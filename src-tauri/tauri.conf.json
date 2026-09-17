@@ -13,10 +13,15 @@
     "windows": [
       {
         "title": "Daycove",
-        "width": 800,
-        "height": 600,
+        "width": 1200,
+        "height": 760,
+        "minWidth": 720,
+        "minHeight": 480,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "decorations": false,
+        "center": true,
+        "shadow": true
       }
     ],
     "security": {

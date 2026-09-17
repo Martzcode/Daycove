@@ -1,0 +1,87 @@
+:host {
+  display: block;
+}
+
+.title-bar {
+  display: flex;
+  align-items: stretch;
+  height: 40px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  user-select: none;
+  -webkit-user-select: none;
+  flex-shrink: 0;
+
+  .left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 8px;
+  }
+
+  .drag-spacer {
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  .icon-btn {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--hover);
+      color: var(--text);
+    }
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-right: 8px;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+
+    .logo {
+      width: 16px;
+      height: 16px;
+      border-radius: 5px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    }
+  }
+
+  .window-controls {
+    display: flex;
+    align-items: stretch;
+
+    .win-btn {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+
+      &:hover {
+        background: var(--hover);
+        color: var(--text);
+      }
+
+      &.close:hover {
+        background: #e5484d;
+        color: #fff;
+      }
+    }
+  }
+}

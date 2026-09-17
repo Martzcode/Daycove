@@ -1,0 +1,56 @@
+<header class="title-bar">
+  <div class="left" data-tauri-drag-region (dblclick)="onDblClickHeader()">
+    <button
+      class="icon-btn"
+      [attr.title]="sidebarOpen() ? 'Masquer le menu' : 'Afficher le menu'"
+      (click)="toggleSidebar.emit()"
+    >
+      @if (sidebarOpen()) {
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="6" y1="6" x2="18" y2="18" />
+          <line x1="18" y1="6" x2="6" y2="18" />
+        </svg>
+      } @else {
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="4" y1="7" x2="20" y2="7" />
+          <line x1="4" y1="12" x2="20" y2="12" />
+          <line x1="4" y1="17" x2="20" y2="17" />
+        </svg>
+      }
+    </button>
+
+    <div class="brand" data-tauri-drag-region>
+      <span class="logo" data-tauri-drag-region></span>
+      <span class="name" data-tauri-drag-region>Daycove</span>
+    </div>
+  </div>
+
+  <div class="drag-spacer" data-tauri-drag-region (dblclick)="onDblClickHeader()"></div>
+
+  <div class="window-controls">
+    <button class="win-btn" title="Réduire" (click)="onMinimize()">
+      <svg width="10" height="10" viewBox="0 0 10 10">
+        <line x1="0.5" y1="5" x2="9.5" y2="5" stroke="currentColor" stroke-width="1" />
+      </svg>
+    </button>
+
+    <button class="win-btn" [attr.title]="isMaximized() ? 'Restaurer' : 'Agrandir'" (click)="onToggleMaximize()">
+      @if (isMaximized()) {
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1">
+          <rect x="0.5" y="0.5" width="9" height="9" />
+          <path d="M3 3V0.5H11.5V9H9" />
+        </svg>
+      } @else {
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1">
+          <rect x="0.5" y="0.5" width="9" height="9" />
+        </svg>
+      }
+    </button>
+
+    <button class="win-btn close" title="Fermer" (click)="onClose()">
+      <svg width="10" height="10" viewBox="0 0 10 10">
+        <path d="M1 1l8 8M9 1l-8 8" stroke="currentColor" stroke-width="1" />
+      </svg>
+    </button>
+  </div>
+</header>
