@@ -1,5 +1,5 @@
 <header class="title-bar">
-  <div class="left" data-tauri-drag-region (dblclick)="onDblClickHeader()">
+  <div class="left" data-tauri-drag-region>
     <button
       class="icon-btn"
       [attr.title]="sidebarOpen() ? 'Masquer le menu' : 'Afficher le menu'"
@@ -25,7 +25,7 @@
     </div>
   </div>
 
-  <div class="drag-spacer" data-tauri-drag-region (dblclick)="onDblClickHeader()"></div>
+  <div class="drag-spacer" data-tauri-drag-region></div>
 
   <div class="window-controls">
     <button class="win-btn" title="Réduire" (click)="onMinimize()">

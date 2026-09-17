@@ -55,10 +55,6 @@ export class TitleBar implements OnDestroy {
     }
   }
 
-  protected onDblClickHeader(): void {
-    void this.onToggleMaximize();
-  }
-
   protected async onClose(): Promise<void> {
     try {
       await this.appWindow?.close();
