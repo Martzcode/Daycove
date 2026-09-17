@@ -524,12 +524,21 @@ dependencies = [
 name = "daycove"
 version = "0.1.0"
 dependencies = [
+ "gdk",
+ "glib",
+ "gobject-sys",
+ "gtk",
  "log",
+ "objc2",
+ "objc2-app-kit",
+ "objc2-foundation",
+ "objc2-web-kit",
  "serde",
  "serde_json",
  "tauri",
  "tauri-build",
  "tauri-plugin-log",
+ "webkit2gtk",
 ]
 
 [[package]]

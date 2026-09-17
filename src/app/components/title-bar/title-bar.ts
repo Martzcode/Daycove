@@ -40,11 +40,19 @@ export class TitleBar implements OnDestroy {
   }
 
   protected async onMinimize(): Promise<void> {
-    await this.appWindow?.minimize();
+    try {
+      await this.appWindow?.minimize();
+    } catch (error) {
+      console.error('Impossible de réduire la fenêtre', error);
+    }
   }
 
   protected async onToggleMaximize(): Promise<void> {
-    await this.appWindow?.toggleMaximize();
+    try {
+      await this.appWindow?.toggleMaximize();
+    } catch (error) {
+      console.error('Impossible d\'agrandir/restaurer la fenêtre', error);
+    }
   }
 
   protected onDblClickHeader(): void {
@@ -52,7 +60,11 @@ export class TitleBar implements OnDestroy {
   }
 
   protected async onClose(): Promise<void> {
-    await this.appWindow?.close();
+    try {
+      await this.appWindow?.close();
+    } catch (error) {
+      console.error('Impossible de fermer la fenêtre', error);
+    }
   }
 
   public ngOnDestroy(): void {

@@ -21,7 +21,8 @@
         "fullscreen": false,
         "decorations": false,
         "center": true,
-        "shadow": true
+        "shadow": true,
+        "zoomHotkeysEnabled": false
       }
     ],
     "security": {
