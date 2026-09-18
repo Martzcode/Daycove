@@ -1,0 +1,145 @@
+<section class="page tasks-page">
+  <h1>{{ i18n.translate('nav.tasks') }}</h1>
+
+  <div class="composer">
+    <div class="segmented">
+      <button class="segment" [class.active]="newType() === 'task'" [type]="'button'" (click)="newType.set('task')">
+        <lucide-angular name="square-check" [size]="14" [strokeWidth]="2" />
+        {{ i18n.translate('tasks.task') }}
+      </button>
+      <button class="segment" [class.active]="newType() === 'note'" [type]="'button'" (click)="newType.set('note')">
+        <lucide-angular name="sticky-note" [size]="14" [strokeWidth]="2" />
+        {{ i18n.translate('tasks.note') }}
+      </button>
+    </div>
+    <input
+      #newField
+      class="text-input"
+      [value]="newInput()"
+      (input)="newInput.set(newField.value)"
+      (keydown.enter)="addNew()"
+      [placeholder]="i18n.translate('tasks.addPlaceholder')"
+    />
+    <button class="add-btn" [type]="'button'" (click)="addNew()">
+      <lucide-angular name="plus" [size]="16" [strokeWidth]="2" />
+    </button>
+  </div>
+
+  @if (cards().length === 0) {
+    <div class="empty-state">
+      {{ i18n.translate('tasks.empty') }}
+    </div>
+  }
+
+  <div class="cards-grid">
+    @for (view of cardViews(); track view.card.id) {
+      <div class="note-card" [class.is-note]="view.card.isNote" [class.is-task]="!view.card.isNote">
+        <div class="card-head">
+          @if (view.card.isNote) {
+            <lucide-angular class="head-icon" name="sticky-note" [size]="14" [strokeWidth]="1.8" />
+          }
+          <span class="card-title">{{ view.card.title }}</span>
+          <div class="card-actions">
+            @if (!view.card.isNote) {
+              <button
+                class="mini-btn"
+                [type]="'button'"
+                [attr.title]="i18n.translate('tasks.addContent')"
+                (click)="beginAdd(view.card.id)"
+              >
+                <lucide-angular name="plus" [size]="14" [strokeWidth]="2" />
+              </button>
+            }
+            <button
+              class="mini-btn danger"
+              [type]="'button'"
+              [attr.title]="i18n.translate('tasks.delete')"
+              (click)="remove(view.card.id)"
+            >
+              <lucide-angular name="trash-2" [size]="14" [strokeWidth]="2" />
+            </button>
+          </div>
+        </div>
+
+        @if (view.card.isNote) {
+          <textarea
+            #noteField
+            class="note-text"
+            [value]="view.card.text"
+            (input)="setNoteText(view.card.id, noteField.value)"
+            [placeholder]="i18n.translate('tasks.notePlaceholder')"
+            rows="4"
+          ></textarea>
+        } @else {
+          <div class="card-body">
+            @if (view.totalCount > 0) {
+              <div class="card-progress">{{ view.doneCount }}/{{ view.totalCount }}</div>
+            }
+
+            @for (entry of view.entries; track entry.node.id) {
+              <div class="check-item" [style.--depth]="entry.depth">
+                <button
+                  class="checkbox"
+                  [class.checked]="entry.node.done"
+                  [type]="'button'"
+                  (click)="toggle(entry.node.id)"
+                >
+                  @if (entry.node.done) {
+                    <lucide-angular name="check" [size]="11" [strokeWidth]="3" />
+                  }
+                </button>
+                <span class="item-text" [class.done]="entry.node.done">{{ entry.node.title }}</span>
+                <div class="item-actions">
+                  <button class="mini-btn" [type]="'button'" (click)="beginAdd(entry.node.id)">
+                    <lucide-angular name="plus" [size]="13" [strokeWidth]="2" />
+                  </button>
+                  <button class="mini-btn danger" [type]="'button'" (click)="remove(entry.node.id)">
+                    <lucide-angular name="trash-2" [size]="13" [strokeWidth]="2" />
+                  </button>
+                </div>
+              </div>
+
+              @if (addingParent() === entry.node.id) {
+                <div class="check-item inline-add" [style.--depth]="entry.depth + 1">
+                  <input
+                    #itemField
+                    class="text-input"
+                    [value]="addingInput()"
+                    (input)="addingInput.set(itemField.value)"
+                    (keydown.enter)="addContent()"
+                    [placeholder]="i18n.translate('tasks.addChild')"
+                  />
+                  <button class="add-btn" [type]="'button'" (click)="addContent()">
+                    <lucide-angular name="check" [size]="14" [strokeWidth]="2.5" />
+                  </button>
+                  <button class="mini-btn" [type]="'button'" (click)="cancelAdd()">
+                    <lucide-angular name="x" [size]="13" [strokeWidth]="2" />
+                  </button>
+                </div>
+              }
+            }
+          </div>
+
+          @if (addingParent() === view.card.id) {
+            <div class="card-foot inline-add">
+              <input
+                #footField
+                class="text-input"
+                [value]="addingInput()"
+                (input)="addingInput.set(footField.value)"
+                (keydown.enter)="addContent()"
+                [placeholder]="i18n.translate('tasks.addChild')"
+              />
+              <button class="add-btn" [type]="'button'" (click)="addContent()">
+                <lucide-angular name="check" [size]="14" [strokeWidth]="2.5" />
+              </button>
+              <button class="mini-btn" [type]="'button'" (click)="cancelAdd()">
+                <lucide-angular name="x" [size]="13" [strokeWidth]="2" />
+              </button>
+            </div>
+          }
+        }
+      </div>
+    }
+  </div>
+</section>
