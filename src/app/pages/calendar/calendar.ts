@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { I18n } from '../../i18n';
 import { SettingsService, type WeekStart } from '../../settings';
@@ -21,6 +22,8 @@ interface Day {
 export class CalendarPage {
   protected readonly i18n = inject(I18n);
   protected readonly settings = inject(SettingsService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   protected readonly weekStart = signal<Date>(CalendarPage.startOfWeek(new Date(), this.settings.weekStart()));
   protected readonly hours: readonly number[] = Array.from({ length: 12 }, (_, i) => 8 + i);
 
@@ -65,6 +68,10 @@ export class CalendarPage {
 
   protected goToToday(): void {
     this.weekStart.set(CalendarPage.startOfWeek(new Date(), this.settings.weekStart()));
+  }
+
+  protected goToItem(id: string): void {
+    void this.router.navigate(['/tasks'], { queryParams: { focus: id } });
   }
 
   private static buildDays(first: Date, localeTag: string, byDate: Map<string, TaskNode[]>): Day[] {

@@ -33,7 +33,13 @@
 
   <div class="cards-grid">
     @for (view of cardViews(); track view.card.id) {
-      <div class="note-card" [class.is-note]="view.card.isNote" [class.is-task]="!view.card.isNote">
+      <div
+        class="note-card"
+        [id]="'task-card-' + view.card.id"
+        [class.is-note]="view.card.isNote"
+        [class.is-task]="!view.card.isNote"
+        [class.focused]="focusId() === view.card.id"
+      >
         <div class="card-head">
           @if (view.card.isNote) {
             <lucide-angular class="head-icon" name="sticky-note" [size]="14" [strokeWidth]="1.8" />

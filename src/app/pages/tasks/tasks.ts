@@ -1,4 +1,5 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, AfterViewInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { I18n } from '../../i18n';
 import { SettingsService, type WeekStart } from '../../settings';
@@ -44,9 +45,10 @@ export const STORAGE_KEY = 'daycove-tasks';
   templateUrl: './tasks.html',
   styleUrl: './tasks.scss',
 })
-export class TasksPage {
+export class TasksPage implements AfterViewInit {
   protected readonly i18n = inject(I18n);
   protected readonly settings = inject(SettingsService);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly newType = signal<NewItemType>('task');
   protected readonly newInput = signal('');
@@ -54,6 +56,7 @@ export class TasksPage {
   protected readonly addingInput = signal('');
   protected readonly dateEditing = signal<string | null>(null);
   protected readonly pickerMonth = signal<Date>(TasksPage.startOfMonth(new Date()));
+  protected readonly focusId = signal<string | null>(null);
 
   protected readonly cards = signal<TaskNode[]>(TasksPage.load());
 
@@ -75,6 +78,20 @@ export class TasksPage {
 
   constructor() {
     effect(() => localStorage.setItem(STORAGE_KEY, JSON.stringify(this.sortedCards())));
+  }
+
+  public ngAfterViewInit(): void {
+    this.route.queryParamMap.subscribe((params) => {
+      const id = params.get('focus');
+      this.focusId.set(id);
+      if (id) {
+        setTimeout(() => this.scrollToCard(id), 100);
+      }
+    });
+  }
+
+  private scrollToCard(id: string): void {
+    document.getElementById(`task-card-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   protected preventEditorBlur(event: MouseEvent): void {

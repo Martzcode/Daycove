@@ -170,13 +170,16 @@
   display: flex;
   align-items: center;
   gap: 5px;
+  width: 100%;
   min-width: 0;
   padding: 3px 6px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--surface-2);
   color: var(--text);
+  font-family: inherit;
   font-size: 12px;
+  text-align: left;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
 

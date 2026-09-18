@@ -30,14 +30,14 @@
             @if (hour === 8 && day.items.length > 0) {
               <div class="day-items">
                 @for (item of day.items; track item.id) {
-                  <div class="day-item" [class.note]="item.isNote" [class.done]="item.done" [title]="item.title">
+                  <button class="day-item" [class.note]="item.isNote" [class.done]="item.done" [title]="item.title" (click)="goToItem(item.id)">
                     @if (!item.isNote) {
                       <lucide-angular name="square-check" [size]="11" [strokeWidth]="2" />
                     } @else {
                       <lucide-angular name="sticky-note" [size]="11" [strokeWidth]="2" />
                     }
                     <span class="day-item-text">{{ item.title }}</span>
-                  </div>
+                  </button>
                 }
               </div>
             }

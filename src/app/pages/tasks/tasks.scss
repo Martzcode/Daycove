@@ -141,6 +141,7 @@
     box-shadow 0.15s ease,
     border-color 0.15s ease;
   overflow: hidden;
+  scroll-margin: 24px;
 
   &.is-note {
     background: var(--note-bg);
@@ -150,6 +151,11 @@
   &:hover {
     box-shadow: 0 3px 10px var(--shadow);
     border-color: var(--border-strong, var(--border));
+  }
+
+  &.focused {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
   }
 }
 
