@@ -25,23 +25,6 @@
     align-items: center;
   }
 
-  .icon-btn {
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    border: none;
-    border-radius: 6px;
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-
-    &:hover {
-      background: var(--hover);
-      color: var(--text);
-    }
-  }
-
   .brand {
     display: flex;
     align-items: center;

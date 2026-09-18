@@ -1,17 +1,5 @@
 <header class="title-bar" data-tauri-drag-region>
   <div class="left" data-tauri-drag-region>
-    <button
-      class="icon-btn"
-      [attr.title]="sidebarOpen() ? 'Masquer le menu' : 'Afficher le menu'"
-      (click)="toggleSidebar.emit()"
-    >
-      @if (sidebarOpen()) {
-        <lucide-angular name="x" [size]="16" [strokeWidth]="2" />
-      } @else {
-        <lucide-angular name="menu" [size]="16" [strokeWidth]="2" />
-      }
-    </button>
-
     <div class="brand" data-tauri-drag-region>
       <span class="logo" data-tauri-drag-region></span>
       <span class="name" data-tauri-drag-region>Daycove</span>

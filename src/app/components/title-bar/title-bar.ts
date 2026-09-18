@@ -1,4 +1,4 @@
-import { Component, inject, input, output, signal, type OnDestroy } from '@angular/core';
+import { Component, inject, signal, type OnDestroy } from '@angular/core';
 import { getCurrentWindow, type Window } from '@tauri-apps/api/window';
 import { isTauri } from '@tauri-apps/api/core';
 import { LucideAngularModule } from 'lucide-angular';
@@ -11,8 +11,6 @@ import { ThemeService } from '../../theme';
   styleUrl: './title-bar.scss',
 })
 export class TitleBar implements OnDestroy {
-  readonly sidebarOpen = input(true);
-  readonly toggleSidebar = output<void>();
   protected readonly isMaximized = signal(false);
 
   private readonly themeService = inject(ThemeService);

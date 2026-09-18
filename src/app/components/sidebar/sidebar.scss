@@ -22,18 +22,6 @@
   user-select: none;
   -webkit-user-select: none;
 
-  &.closed {
-    width: 0;
-    padding-left: 0;
-    padding-right: 0;
-    border-right-color: transparent;
-
-    .nav-item {
-      opacity: 0;
-      transform: translateX(-8px);
-    }
-  }
-
   .nav-item {
     display: flex;
     align-items: center;
@@ -44,11 +32,7 @@
     text-decoration: none;
     font-size: 13.5px;
     font-weight: 500;
-    opacity: 1;
-    transform: translateX(0);
     transition:
-      opacity 0.15s ease,
-      transform 0.15s ease,
       background 0.15s ease,
       color 0.15s ease;
 

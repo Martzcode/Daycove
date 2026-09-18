@@ -1,11 +1,8 @@
 <div class="app-shell">
-  <app-title-bar
-    [sidebarOpen]="sidebarOpen()"
-    (toggleSidebar)="sidebarOpen.update((value) => !value)"
-  />
+  <app-title-bar />
 
   <div class="body">
-    <app-sidebar [open]="sidebarOpen()" />
+    <app-sidebar />
     <main class="content">
       <router-outlet />
     </main>

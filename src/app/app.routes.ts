@@ -8,4 +8,5 @@ export const routes: Routes = [
   { path: 'dashboard', component: FeaturePage, data: { title: 'Tableau de bord' } },
   { path: 'tasks', component: FeaturePage, data: { title: 'Tâches' } },
   { path: 'settings', component: FeaturePage, data: { title: 'Paramètres' } },
+  { path: 'about', component: FeaturePage, data: { title: 'À propos' } },
 ];
