@@ -158,13 +158,18 @@ jobs:
       - name: Install Fedora system dependencies
         run: |
           dnf install -y \
+            gcc \
+            gcc-c++ \
+            make \
+            pkgconf-pkg-config \
             webkit2gtk4.1-devel \
             gtk3-devel \
             openssl-devel \
             librsvg2-devel \
             patchelf \
             file \
-            findutils
+            findutils \
+            coreutils
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
