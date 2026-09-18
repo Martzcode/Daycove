@@ -35,7 +35,7 @@ jobs:
           MONTH=$(date +%-m)
           MONTH_PAD=$(printf "%02d" "$MONTH")
           # Count existing tags for the current month -> xx resets to 01 at each new month.
-          COUNT=$(git tag -l "${YEAR}.${MONTH}.*" | wc -l)
+          COUNT=$(git tag -l "v${YEAR}.${MONTH}.*" | wc -l)
           PATCH=$((COUNT + 1))
           PATCH_PAD=$(printf "%02d" "$PATCH")
           SEMVER="${YEAR}.${MONTH}.${PATCH}"
@@ -213,7 +213,7 @@ jobs:
           if (-not $exe) { throw "daycove.exe not found" }
           $publisher = $env:MS_STORE_PUBLISHER
           if ([string]::IsNullOrEmpty($publisher)) { $publisher = "CN=Martzcode" }
-          $version = "$env:SEMVER.0"
+          $version = "${env:SEMVER}.0"
 
           New-Item -ItemType Directory -Path "msix/Assets" -Force | Out-Null
           Copy-Item $exe.FullName "msix/"
@@ -230,12 +230,18 @@ jobs:
                    xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities">
             <Identity Name="com.daycove.app"
                       Publisher="$publisher"
-                      Version="$version" />
+                      Version="$version"
+                      ProcessorArchitecture="x64" />
             <Properties>
               <DisplayName>Daycove</DisplayName>
               <PublisherDisplayName>Martzcode</PublisherDisplayName>
               <Logo>Assets\StoreLogo.png</Logo>
             </Properties>
+            <Dependencies>
+              <TargetDeviceFamily Name="Windows.Desktop"
+                                  MinVersion="10.0.17763.0"
+                                  MaxVersionTested="10.0.0.0" />
+            </Dependencies>
             <Resources>
               <Resource Language="en-us" />
               <Resource Language="fr-fr" />
@@ -265,7 +271,7 @@ jobs:
           if (-not $makeappx) { throw "makeappx.exe not found (Windows SDK missing)" }
 
           New-Item -ItemType Directory -Path release-artifacts -Force | Out-Null
-          $msix = "release-artifacts/Daycove_$env:DISPLAY_VERSION_x64.msix"
+          $msix = "release-artifacts/Daycove_${env:DISPLAY_VERSION}_x64.msix"
           & $makeappx pack /d msix /p $msix /nv /o
           if ($LASTEXITCODE -ne 0) { throw "makeappx failed" }
 
