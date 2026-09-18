@@ -58,8 +58,6 @@ jobs:
             bundles: 'dmg'
           - platform: ubuntu-22.04
             bundles: 'deb'
-          - platform: fedora-latest
-            bundles: 'rpm'
           - platform: windows-latest
             bundles: 'msi,nsis'
     runs-on: ${{ matrix.platform }}
@@ -74,17 +72,6 @@ jobs:
             libwebkit2gtk-4.1-dev \
             libappindicator3-dev \
             librsvg2-dev \
-            patchelf \
-            file
-
-      - name: Install Fedora system dependencies
-        if: startsWith(matrix.platform, 'fedora')
-        run: |
-          sudo dnf install -y \
-            webkit2gtk4.1-devel \
-            gtk3-devel \
-            openssl-devel \
-            librsvg2-devel \
             patchelf \
             file
 
@@ -154,6 +141,81 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bundles-${{ matrix.platform }}
+          path: release-artifacts/
+          if-no-files-found: error
+
+  rpm:
+    name: Build RPM (Fedora)
+    needs: version
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Fedora system dependencies
+        run: |
+          dnf install -y \
+            webkit2gtk4.1-devel \
+            gtk3-devel \
+            openssl-devel \
+            librsvg2-devel \
+            patchelf \
+            file \
+            findutils
+
+      - name: Set version
+        shell: bash
+        env:
+          SEMVER: ${{ needs.version.outputs.semver }}
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const semver = process.env.SEMVER;
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          pkg.version = semver;
+          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          const conf = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8'));
+          conf.version = semver;
+          fs.writeFileSync('src-tauri/tauri.conf.json', JSON.stringify(conf, null, 2) + '\n');
+          const cargo = fs.readFileSync('src-tauri/Cargo.toml', 'utf8');
+          fs.writeFileSync('src-tauri/Cargo.toml', cargo.replace(/^version = ".*"/m, 'version = "' + semver + '"'));
+          NODE
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install npm dependencies
+        run: npm install
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Build RPM bundle
+        uses: tauri-apps/tauri-action@v0
+        with:
+          args: --bundles rpm
+
+      - name: Collect artifacts
+        shell: bash
+        run: |
+          mkdir -p release-artifacts
+          find src-tauri/target -path '*/bundle/rpm/*.rpm' -exec cp {} release-artifacts/ \;
+          ls -la release-artifacts/
+
+      - name: Upload RPM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundles-fedora-rpm
           path: release-artifacts/
           if-no-files-found: error
 
@@ -312,7 +374,7 @@ jobs:
 
   release:
     name: Publish release
-    needs: [version, build, msix]
+    needs: [version, build, rpm, msix]
     runs-on: ubuntu-latest
     permissions:
       contents: write
