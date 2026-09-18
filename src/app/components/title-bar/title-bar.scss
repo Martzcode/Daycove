@@ -64,6 +64,13 @@
     display: flex;
     align-items: stretch;
 
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      border-right: 1px solid var(--border);
+      margin-right: 4px;
+    }
+
     .win-btn {
       display: grid;
       place-items: center;

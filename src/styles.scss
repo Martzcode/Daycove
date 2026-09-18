@@ -1,15 +1,29 @@
 :root {
-  --bg: #0e1015;
-  --surface: #141721;
-  --surface-2: #1a1e2b;
-  --border: #232838;
-  --hover: #262b3a;
-  --text: #e8ebf3;
-  --muted: #8a93a8;
-  --accent: #7c6cf0;
-  --accent-2: #4ec9c4;
-  --accent-soft: rgba(124, 108, 240, 0.18);
-  --accent-text: #b9b0ff;
+  --bg: #0b0b0d;
+  --surface: #131316;
+  --surface-2: #1a1a1e;
+  --border: #2a2a31;
+  --hover: #24242a;
+  --text: #f2eee7;
+  --muted: #9a9386;
+  --accent: #ff8a00;
+  --accent-2: #ffc24d;
+  --accent-soft: rgba(255, 138, 0, 0.16);
+  --accent-text: #ffb366;
+}
+
+[data-theme='light'] {
+  --bg: #f2f5fb;
+  --surface: #ffffff;
+  --surface-2: #e9eef8;
+  --border: #d5ddec;
+  --hover: #e0e8f6;
+  --text: #17233a;
+  --muted: #5a6a8c;
+  --accent: #2563eb;
+  --accent-2: #06b6d4;
+  --accent-soft: rgba(37, 99, 235, 0.12);
+  --accent-text: #1d4ed8;
 }
 
 * {
@@ -38,6 +52,9 @@ body {
   overflow: hidden;
   touch-action: manipulation;
   overscroll-behavior: none;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease;
 }
 
 button {
