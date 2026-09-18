@@ -62,14 +62,31 @@
         </div>
 
         @if (view.card.isNote) {
-          <textarea
-            #noteField
-            class="note-text"
-            [value]="view.card.text"
-            (input)="setNoteText(view.card.id, noteField.value)"
-            [placeholder]="i18n.translate('tasks.notePlaceholder')"
-            rows="4"
-          ></textarea>
+          <div class="note-editor">
+            <div
+              #noteEditor="appRichText"
+              appRichText
+              class="note-text"
+              contenteditable="true"
+              [appRichText]="view.card.text"
+              (appRichTextChange)="setNoteText(view.card.id, $event)"
+              [attr.data-placeholder]="i18n.translate('tasks.notePlaceholder')"
+            ></div>
+            <div class="format-bar">
+              <button class="fmt-btn" [type]="'button'" [attr.title]="i18n.translate('tasks.formatBold')" (mousedown)="preventEditorBlur($event)" (click)="noteEditor.exec('bold')">
+                <lucide-angular name="bold" [size]="13" [strokeWidth]="2" />
+              </button>
+              <button class="fmt-btn" [type]="'button'" [attr.title]="i18n.translate('tasks.formatItalic')" (mousedown)="preventEditorBlur($event)" (click)="noteEditor.exec('italic')">
+                <lucide-angular name="italic" [size]="13" [strokeWidth]="2" />
+              </button>
+              <button class="fmt-btn" [type]="'button'" [attr.title]="i18n.translate('tasks.formatUnderline')" (mousedown)="preventEditorBlur($event)" (click)="noteEditor.exec('underline')">
+                <lucide-angular name="underline" [size]="13" [strokeWidth]="2" />
+              </button>
+              <button class="fmt-btn" [type]="'button'" [attr.title]="i18n.translate('tasks.formatList')" (mousedown)="preventEditorBlur($event)" (click)="noteEditor.exec('insertUnorderedList')">
+                <lucide-angular name="list" [size]="13" [strokeWidth]="2" />
+              </button>
+            </div>
+          </div>
         } @else {
           <div class="card-body">
             @if (view.totalCount > 0) {

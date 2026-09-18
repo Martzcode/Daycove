@@ -1,6 +1,7 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { I18n } from '../../i18n';
+import { RichTextDirective } from './rich-text.directive';
 
 export type NewItemType = 'task' | 'note';
 
@@ -29,7 +30,7 @@ const STORAGE_KEY = 'daycove-tasks';
 
 @Component({
   selector: 'app-tasks',
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, RichTextDirective],
   templateUrl: './tasks.html',
   styleUrl: './tasks.scss',
 })
@@ -59,6 +60,10 @@ export class TasksPage {
 
   constructor() {
     effect(() => localStorage.setItem(STORAGE_KEY, JSON.stringify(this.cards())));
+  }
+
+  protected preventEditorBlur(event: MouseEvent): void {
+    event.preventDefault();
   }
 
   protected addNew(): void {

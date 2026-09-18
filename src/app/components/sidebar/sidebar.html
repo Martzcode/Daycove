@@ -9,16 +9,6 @@
     <span>{{ i18n.translate('nav.calendar') }}</span>
   </a>
 
-  <a
-    class="nav-item"
-    routerLink="/dashboard"
-    routerLinkActive="active"
-    [routerLinkActiveOptions]="{ exact: true }"
-  >
-    <lucide-angular name="layout-grid" [size]="18" [strokeWidth]="1.8" />
-    <span>{{ i18n.translate('nav.dashboard') }}</span>
-  </a>
-
   <a class="nav-item" routerLink="/tasks" routerLinkActive="active">
     <lucide-angular name="list-checks" [size]="18" [strokeWidth]="1.8" />
     <span>{{ i18n.translate('nav.tasks') }}</span>
