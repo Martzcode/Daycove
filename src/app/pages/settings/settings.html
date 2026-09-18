@@ -20,5 +20,23 @@
         </select>
       </div>
     </div>
+    <div class="form-row">
+      <label class="form-label" for="week-start-select">
+        {{ i18n.translate('settings.weekStart') }}
+      </label>
+      <div class="form-control">
+        <select
+          id="week-start-select"
+          class="form-select"
+          (change)="onWeekStartChange($event)"
+        >
+          @for (weekStart of weekStarts; track weekStart) {
+            <option [value]="weekStart" [selected]="settings.weekStart() === weekStart">
+              {{ i18n.translate('settings.weekStart.' + weekStart) }}
+            </option>
+          }
+        </select>
+      </div>
+    </div>
   </div>
 </section>

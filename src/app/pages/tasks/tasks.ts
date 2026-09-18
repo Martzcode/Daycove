@@ -1,6 +1,7 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { I18n } from '../../i18n';
+import { SettingsService, type WeekStart } from '../../settings';
 import { RichTextDirective } from './rich-text.directive';
 
 export type NewItemType = 'task' | 'note';
@@ -45,6 +46,7 @@ export const STORAGE_KEY = 'daycove-tasks';
 })
 export class TasksPage {
   protected readonly i18n = inject(I18n);
+  protected readonly settings = inject(SettingsService);
 
   protected readonly newType = signal<NewItemType>('task');
   protected readonly newInput = signal('');
@@ -131,7 +133,7 @@ export class TasksPage {
       new Intl.DateTimeFormat(this.i18n.localeTag(), { month: 'long', year: 'numeric' }).format(this.pickerMonth()),
     ),
   );
-  protected weekdayLabels = computed(() => TasksPage.buildWeekdayLabels(this.i18n.localeTag()));
+  protected weekdayLabels = computed(() => TasksPage.buildWeekdayLabels(this.i18n.localeTag(), this.settings.weekStart()));
 
   protected shiftPickerMonth(offset: number): void {
     this.pickerMonth.update((m) => {
@@ -151,7 +153,7 @@ export class TasksPage {
 
   private buildPickerDays(month: Date, selectedDate: string | null): DayCell[] {
     const first = new Date(month.getFullYear(), month.getMonth(), 1);
-    const start = TasksPage.addDays(first, -((first.getDay() + 6) % 7));
+    const start = TasksPage.addDays(first, -TasksPage.weekOffset(first.getDay(), this.settings.weekStart()));
     const today = new Date();
     const todayIso = TasksPage.toISODate(today);
     return Array.from({ length: 42 }, (_, i) => {
@@ -206,10 +208,23 @@ export class TasksPage {
     return value.charAt(0).toUpperCase() + value.slice(1);
   }
 
-  private static buildWeekdayLabels(localeTag: string): string[] {
+  private static buildWeekdayLabels(localeTag: string, start: WeekStart): string[] {
     const fmt = new Intl.DateTimeFormat(localeTag, { weekday: 'short' });
-    const monday = new Date(2024, 0, 1);
-    return Array.from({ length: 7 }, (_, i) => fmt.format(TasksPage.addDays(monday, i)).replace('.', ''));
+    const offset = TasksPage.weekOffset(1, start);
+    const first = new Date(2024, 0, 1);
+    return Array.from({ length: 7 }, (_, i) => fmt.format(TasksPage.addDays(first, i - offset)).replace('.', ''));
+  }
+
+  private static weekOffset(getDay: number, start: WeekStart): number {
+    switch (start) {
+      case 'sunday':
+        return getDay;
+      case 'saturday':
+        return (getDay + 1) % 7;
+      case 'monday':
+      default:
+        return getDay === 0 ? 6 : getDay - 1;
+    }
   }
 
   private static findNode<T extends TaskNode>(nodes: readonly T[], id: string): T | undefined {
