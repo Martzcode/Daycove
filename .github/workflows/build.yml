@@ -166,6 +166,14 @@ jobs:
             file \
             findutils
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install npm dependencies
+        run: npm install
+
       - name: Set version
         shell: bash
         env:
@@ -183,14 +191,6 @@ jobs:
           const cargo = fs.readFileSync('src-tauri/Cargo.toml', 'utf8');
           fs.writeFileSync('src-tauri/Cargo.toml', cargo.replace(/^version = ".*"/m, 'version = "' + semver + '"'));
           NODE
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Install npm dependencies
-        run: npm install
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
