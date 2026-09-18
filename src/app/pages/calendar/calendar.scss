@@ -143,6 +143,7 @@
 }
 
 .time-cell {
+  position: relative;
   border-bottom: 1px solid var(--border);
 
   &:nth-child(8n) {
@@ -155,5 +156,50 @@
 
   &.today {
     background: var(--accent-soft);
+  }
+}
+
+.day-items {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 5px;
+}
+
+.day-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 3px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background: var(--hover);
+    border-color: var(--accent);
+  }
+
+  &.note {
+    background: var(--note-bg);
+    border-color: var(--note-border);
+  }
+
+  &.done {
+    color: var(--muted);
+    text-decoration: line-through;
+  }
+
+  .day-item-text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }

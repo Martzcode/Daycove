@@ -270,6 +270,134 @@
   }
 }
 
+.card-date {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  align-self: flex-start;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--accent-text);
+  font-size: 12px;
+
+  lucide-angular {
+    flex-shrink: 0;
+    color: var(--accent);
+  }
+
+  .date-text {
+    min-width: 0;
+  }
+
+  .mini-btn {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.date-editor {
+  position: relative;
+  margin: 0 auto;
+  padding: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  .mc-close {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+  }
+}
+
+.mini-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0 22px 2px;
+
+  .mc-month {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    text-transform: capitalize;
+  }
+}
+
+.mc-nav {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--hover);
+    color: var(--text);
+  }
+}
+
+.mc-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+
+  .mc-wd {
+    padding: 3px 0;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: capitalize;
+  }
+}
+
+.mc-day {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-width: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text);
+  font-size: 12.5px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--hover);
+  }
+
+  &.out-month {
+    color: var(--muted);
+    opacity: 0.5;
+  }
+
+  &.today {
+    border: 1px solid var(--accent);
+  }
+
+  &.selected {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+  }
+}
+
 .check-item {
   display: flex;
   align-items: center;
@@ -363,6 +491,19 @@
   &.checked {
     background: var(--accent);
     border-color: var(--accent);
+  }
+
+  &.derived {
+    cursor: default;
+    border-style: dashed;
+
+    &:hover {
+      border-color: var(--muted);
+    }
+
+    &.checked {
+      border-style: solid;
+    }
   }
 }
 

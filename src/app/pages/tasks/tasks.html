@@ -40,6 +40,14 @@
           }
           <span class="card-title">{{ view.card.title }}</span>
           <div class="card-actions">
+            <button
+              class="mini-btn"
+              [type]="'button'"
+              [attr.title]="i18n.translate('tasks.setDate')"
+              (click)="toggleDateEditor(view.card.id)"
+            >
+              <lucide-angular name="calendar-plus" [size]="14" [strokeWidth]="2" />
+            </button>
             @if (!view.card.isNote) {
               <button
                 class="mini-btn"
@@ -60,6 +68,52 @@
             </button>
           </div>
         </div>
+
+        @if (view.card.date) {
+          <div class="card-date">
+            <lucide-angular name="calendar" [size]="12" [strokeWidth]="2" />
+            <span class="date-text">{{ formatDate(view.card.date) }}</span>
+            <button class="mini-btn" [type]="'button'" (click)="setDate(view.card.id, '')">
+              <lucide-angular name="x" [size]="11" [strokeWidth]="2" />
+            </button>
+          </div>
+        }
+
+        @if (dateEditing() === view.card.id) {
+          <div class="date-editor">
+            <div class="mini-calendar">
+              <div class="mc-head">
+                <button class="mc-nav" [type]="'button'" (click)="shiftPickerMonth(-1)">
+                  <lucide-angular name="chevron-left" [size]="14" [strokeWidth]="2" />
+                </button>
+                <span class="mc-month">{{ pickerMonthLabel() }}</span>
+                <button class="mc-nav" [type]="'button'" (click)="shiftPickerMonth(1)">
+                  <lucide-angular name="chevron-right" [size]="14" [strokeWidth]="2" />
+                </button>
+              </div>
+              <div class="mc-grid">
+                @for (wd of weekdayLabels(); track wd) {
+                  <span class="mc-wd">{{ wd }}</span>
+                }
+                @for (cell of pickerDays(); track cell.iso) {
+                  <button
+                    class="mc-day"
+                    [class.out-month]="!cell.inMonth"
+                    [class.today]="cell.isToday"
+                    [class.selected]="cell.isSelected"
+                    [type]="'button'"
+                    (click)="setDate(view.card.id, cell.iso)"
+                  >
+                    {{ cell.day }}
+                  </button>
+                }
+              </div>
+            </div>
+            <button class="mini-btn mc-close" [type]="'button'" (click)="dateEditing.set(null)">
+              <lucide-angular name="x" [size]="12" [strokeWidth]="2" />
+            </button>
+          </div>
+        }
 
         @if (view.card.isNote) {
           <div class="note-editor">
@@ -95,16 +149,24 @@
 
             @for (entry of view.entries; track entry.node.id) {
               <div class="check-item" [style.--depth]="entry.depth">
-                <button
-                  class="checkbox"
-                  [class.checked]="entry.node.done"
-                  [type]="'button'"
-                  (click)="toggle(entry.node.id)"
-                >
-                  @if (entry.node.done) {
-                    <lucide-angular name="check" [size]="11" [strokeWidth]="3" />
-                  }
-                </button>
+                @if (entry.node.content.length > 0) {
+                  <span class="checkbox derived" [class.checked]="entry.node.done">
+                    @if (entry.node.done) {
+                      <lucide-angular name="check" [size]="11" [strokeWidth]="3" />
+                    }
+                  </span>
+                } @else {
+                  <button
+                    class="checkbox"
+                    [class.checked]="entry.node.done"
+                    [type]="'button'"
+                    (click)="toggle(entry.node.id)"
+                  >
+                    @if (entry.node.done) {
+                      <lucide-angular name="check" [size]="11" [strokeWidth]="3" />
+                    }
+                  </button>
+                }
                 <span class="item-text" [class.done]="entry.node.done">{{ entry.node.title }}</span>
                 <div class="item-actions">
                   <button class="mini-btn" [type]="'button'" (click)="beginAdd(entry.node.id)">

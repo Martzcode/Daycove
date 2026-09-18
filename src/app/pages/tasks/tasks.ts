@@ -11,6 +11,7 @@ export interface TaskNode {
   done: boolean;
   isNote: boolean;
   text: string;
+  date: string;
   content: TaskNode[];
 }
 
@@ -26,7 +27,15 @@ interface CardView {
   readonly totalCount: number;
 }
 
-const STORAGE_KEY = 'daycove-tasks';
+interface DayCell {
+  readonly iso: string;
+  readonly day: number;
+  readonly inMonth: boolean;
+  readonly isToday: boolean;
+  readonly isSelected: boolean;
+}
+
+export const STORAGE_KEY = 'daycove-tasks';
 
 @Component({
   selector: 'app-tasks',
@@ -41,6 +50,8 @@ export class TasksPage {
   protected readonly newInput = signal('');
   protected readonly addingParent = signal<string | null>(null);
   protected readonly addingInput = signal('');
+  protected readonly dateEditing = signal<string | null>(null);
+  protected readonly pickerMonth = signal<Date>(TasksPage.startOfMonth(new Date()));
 
   protected readonly cards = signal<TaskNode[]>(TasksPage.load());
 
@@ -76,7 +87,7 @@ export class TasksPage {
   }
 
   protected toggle(id: string): void {
-    this.cards.update((list) => TasksPage.mapNode(list, id, (node) => ({ ...node, done: !node.done })));
+    this.cards.update((list) => TasksPage.propagateDone(TasksPage.mapNode(list, id, (node) => ({ ...node, done: !node.done }))));
   }
 
   protected beginAdd(parent: string): void {
@@ -103,8 +114,113 @@ export class TasksPage {
     this.cards.update((list) => TasksPage.mapNode(list, id, (node) => ({ ...node, text })));
   }
 
+  protected toggleDateEditor(id: string): void {
+    const opening = this.dateEditing() !== id;
+    this.dateEditing.set(opening ? id : null);
+    if (opening) {
+      const node = TasksPage.findNode(this.cards(), id);
+      this.pickerMonth.set(node?.date ? new Date(`${node.date}T00:00:00`) : new Date());
+    }
+  }
+
+  protected pickerDays = computed(() => this.buildPickerDays(this.pickerMonth(), this.editingDateValue()));
+  protected pickerMonthLabel = computed(() =>
+    TasksPage.capitalize(
+      new Intl.DateTimeFormat(this.i18n.localeTag(), { month: 'long', year: 'numeric' }).format(this.pickerMonth()),
+    ),
+  );
+  protected weekdayLabels = computed(() => TasksPage.buildWeekdayLabels(this.i18n.localeTag()));
+
+  protected shiftPickerMonth(offset: number): void {
+    this.pickerMonth.update((m) => {
+      const next = new Date(m);
+      next.setMonth(next.getMonth() + offset);
+      return next;
+    });
+  }
+
+  private editingDateValue(): string | null {
+    const id = this.dateEditing();
+    if (!id) {
+      return null;
+    }
+    return TasksPage.findNode(this.cards(), id)?.date ?? null;
+  }
+
+  private buildPickerDays(month: Date, selectedDate: string | null): DayCell[] {
+    const first = new Date(month.getFullYear(), month.getMonth(), 1);
+    const start = TasksPage.addDays(first, -((first.getDay() + 6) % 7));
+    const today = new Date();
+    const todayIso = TasksPage.toISODate(today);
+    return Array.from({ length: 42 }, (_, i) => {
+      const day = TasksPage.addDays(start, i);
+      const iso = TasksPage.toISODate(day);
+      return {
+        iso,
+        day: day.getDate(),
+        inMonth: day.getMonth() === month.getMonth(),
+        isToday: iso === todayIso,
+        isSelected: iso === selectedDate,
+      };
+    });
+  }
+
+  protected setDate(id: string, value: string): void {
+    this.cards.update((list) => TasksPage.mapNode(list, id, (node) => ({ ...node, date: value })));
+    this.dateEditing.set(null);
+  }
+
+  protected formatDate(value: string): string {
+    if (!value) {
+      return '';
+    }
+    return new Intl.DateTimeFormat(this.i18n.localeTag(), { day: 'numeric', month: 'short' }).format(
+      new Date(`${value}T00:00:00`),
+    );
+  }
+
   protected remove(id: string): void {
     this.cards.update((list) => TasksPage.removeNode(list, id));
+  }
+
+  private static addDays(date: Date, jours: number): Date {
+    const result = new Date(date);
+    result.setDate(result.getDate() + jours);
+    return result;
+  }
+
+  private static startOfMonth(date: Date): Date {
+    return new Date(date.getFullYear(), date.getMonth(), 1);
+  }
+
+  private static toISODate(d: Date): string {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  private static capitalize(value: string): string {
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  }
+
+  private static buildWeekdayLabels(localeTag: string): string[] {
+    const fmt = new Intl.DateTimeFormat(localeTag, { weekday: 'short' });
+    const monday = new Date(2024, 0, 1);
+    return Array.from({ length: 7 }, (_, i) => fmt.format(TasksPage.addDays(monday, i)).replace('.', ''));
+  }
+
+  private static findNode<T extends TaskNode>(nodes: readonly T[], id: string): T | undefined {
+    for (const node of nodes) {
+      if (node.id === id) {
+        return node;
+      }
+      const found = TasksPage.findNode<T>(node.content as T[], id);
+      if (found) {
+        return found;
+      }
+    }
+    return undefined;
   }
 
   private static createNode(title: string, type: NewItemType): TaskNode {
@@ -114,8 +230,17 @@ export class TasksPage {
       done: false,
       isNote: type === 'note',
       text: '',
+      date: '',
       content: [],
     };
+  }
+
+  private static propagateDone(nodes: TaskNode[]): TaskNode[] {
+    return nodes.map((node) => {
+      const content = TasksPage.propagateDone(node.content);
+      const done = content.length > 0 ? content.every((child) => child.done) : node.done;
+      return { ...node, content, done };
+    });
   }
 
   private static flatten(nodes: readonly TaskNode[], depth = 0, out: FlatEntry[] = []): FlatEntry[] {
@@ -153,14 +278,14 @@ export class TasksPage {
     });
   }
 
-  private static load(): TaskNode[] {
+  static load(): TaskNode[] {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) {
         return [];
       }
       const parsed: unknown = JSON.parse(raw);
-      return Array.isArray(parsed) ? TasksPage.normalize(parsed) : [];
+      return Array.isArray(parsed) ? TasksPage.propagateDone(TasksPage.normalize(parsed)) : [];
     } catch {
       return [];
     }
@@ -178,6 +303,7 @@ export class TasksPage {
           text?: unknown;
           done?: unknown;
           isNote?: unknown;
+          date?: unknown;
           content?: unknown;
           children?: unknown;
         };
@@ -189,6 +315,7 @@ export class TasksPage {
           done: item.done === true,
           isNote,
           text: isNote ? (typeof item.text === 'string' ? item.text : '') : '',
+          date: typeof item.date === 'string' ? item.date : '',
           content: isNote
             ? []
             : TasksPage.normalize(
