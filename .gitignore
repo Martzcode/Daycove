@@ -32,6 +32,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Documents locaux
+/docs/
+
 # OS
 .DS_Store
 Thumbs.db

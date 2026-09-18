@@ -1,0 +1,320 @@
+name: Build & Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  APP_NAME: Daycove
+
+jobs:
+  version:
+    name: Compute version
+    runs-on: ubuntu-latest
+    outputs:
+      semver: ${{ steps.version.outputs.semver }}
+      display: ${{ steps.version.outputs.display }}
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute version (YYYY.M.x stored / YYYY.MM.xx displayed)
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          YEAR=$(date +%Y)
+          MONTH=$(date +%-m)
+          MONTH_PAD=$(printf "%02d" "$MONTH")
+          # Count existing tags for the current month -> xx resets to 01 at each new month.
+          COUNT=$(git tag -l "${YEAR}.${MONTH}.*" | wc -l)
+          PATCH=$((COUNT + 1))
+          PATCH_PAD=$(printf "%02d" "$PATCH")
+          SEMVER="${YEAR}.${MONTH}.${PATCH}"
+          DISPLAY="${YEAR}.${MONTH_PAD}.${PATCH_PAD}"
+          echo "semver=${SEMVER}" >> "$GITHUB_OUTPUT"
+          echo "display=${DISPLAY}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${SEMVER}" >> "$GITHUB_OUTPUT"
+          echo "Computed version: ${SEMVER} (displayed: ${DISPLAY})"
+
+  build:
+    name: Build ${{ matrix.platform }}
+    needs: version
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            bundles: 'dmg'
+          - platform: ubuntu-22.04
+            bundles: 'deb,rpm'
+          - platform: windows-latest
+            bundles: 'msi,nsis'
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux system dependencies
+        if: startsWith(matrix.platform, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            rpm \
+            file
+
+      - name: Set version
+        shell: bash
+        env:
+          SEMVER: ${{ needs.version.outputs.semver }}
+        run: node -e "
+            const fs = require('fs');
+            const semver = process.env.SEMVER;
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            pkg.version = semver;
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+            const conf = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8'));
+            conf.version = semver;
+            fs.writeFileSync('src-tauri/tauri.conf.json', JSON.stringify(conf, null, 2) + '\n');
+            const cargo = fs.readFileSync('src-tauri/Cargo.toml', 'utf8');
+            fs.writeFileSync('src-tauri/Cargo.toml', cargo.replace(/^version = \".*\"/m, 'version = \"' + semver + '\"'));
+            console.log('Version set to', semver);
+          "
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Build bundles
+        uses: tauri-apps/tauri-action@v0
+        with:
+          args: --bundles ${{ matrix.bundles }}
+
+      - name: Collect artifacts
+        shell: bash
+        run: |
+          mkdir -p release-artifacts
+          if [ "${{ runner.os }}" == "macOS" ]; then
+            find src-tauri/target -path '*/bundle/dmg/*.dmg' -exec cp {} release-artifacts/ \;
+          fi
+          if [ "${{ runner.os }}" == "Linux" ]; then
+            find src-tauri/target -path '*/bundle/deb/*.deb' -exec cp {} release-artifacts/ \;
+            find src-tauri/target -path '*/bundle/rpm/*.rpm' -exec cp {} release-artifacts/ \;
+          fi
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            find src-tauri/target -path '*/bundle/msi/*.msi' -exec cp {} release-artifacts/ \;
+            find src-tauri/target -path '*/bundle/nsis/*.exe' -exec cp {} release-artifacts/ \;
+          fi
+          ls -la release-artifacts/
+
+      - name: Upload bundle artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundles-${{ matrix.platform }}
+          path: release-artifacts/
+          if-no-files-found: error
+
+  msix:
+    name: Build MSIX (Microsoft Store)
+    needs: version
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Set version
+        shell: bash
+        env:
+          SEMVER: ${{ needs.version.outputs.semver }}
+        run: node -e "
+            const fs = require('fs');
+            const semver = process.env.SEMVER;
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            pkg.version = semver;
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+            const conf = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8'));
+            conf.version = semver;
+            fs.writeFileSync('src-tauri/tauri.conf.json', JSON.stringify(conf, null, 2) + '\n');
+            const cargo = fs.readFileSync('src-tauri/Cargo.toml', 'utf8');
+            fs.writeFileSync('src-tauri/Cargo.toml', cargo.replace(/^version = \".*\"/m, 'version = \"' + semver + '\"'));
+          "
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Build release binary
+        run: npm run tauri build -- --no-bundle --ci
+
+      - name: Create MSIX package
+        shell: pwsh
+        env:
+          DISPLAY_VERSION: ${{ needs.version.outputs.display }}
+          SEMVER: ${{ needs.version.outputs.semver }}
+          MS_STORE_PUBLISHER: ${{ secrets.MS_STORE_PUBLISHER }}
+          MSIX_PFX_BASE64: ${{ secrets.MSIX_PFX_BASE64 }}
+          MSIX_PFX_PASSWORD: ${{ secrets.MSIX_PFX_PASSWORD }}
+        run: |
+          function Copy-Icon($src, $dst, $size) {
+            $magick = Get-Command magick -ErrorAction SilentlyContinue
+            if ($magick) { & magick $src -resize "${size}x${size}" $dst }
+            else { Copy-Item $src $dst }
+          }
+
+          $exe = Get-ChildItem -Recurse -Path "src-tauri/target/release" -Filter "daycove.exe" | Select-Object -First 1
+          if (-not $exe) { throw "daycove.exe not found" }
+          $publisher = $env:MS_STORE_PUBLISHER
+          if ([string]::IsNullOrEmpty($publisher)) { $publisher = "CN=Martzcode" }
+          $version = "$env:SEMVER.0"
+
+          New-Item -ItemType Directory -Path "msix/Assets" -Force | Out-Null
+          Copy-Item $exe.FullName "msix/"
+
+          Copy-Icon "src-tauri/icons/StoreLogo.png" "msix/Assets/StoreLogo.png" 50
+          Copy-Icon "src-tauri/icons/Square150x150Logo.png" "msix/Assets/Square150x150Logo.png" 150
+          Copy-Icon "src-tauri/icons/Square44x44Logo.png" "msix/Assets/Square44x44Logo.png" 44
+          Copy-Icon "src-tauri/icons/Square310x310Logo.png" "msix/Assets/Wide310x150Logo.png" 310
+
+          $manifest = @"
+<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+         xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities">
+  <Identity Name="com.daycove.app"
+            Publisher="$publisher"
+            Version="$version" />
+  <Properties>
+    <DisplayName>Daycove</DisplayName>
+    <PublisherDisplayName>Martzcode</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+  <Resources>
+    <Resource Language="en-us" />
+    <Resource Language="fr-fr" />
+    <Resource Language="de-de" />
+    <Resource Language="es-es" />
+  </Resources>
+  <Applications>
+    <Application Id="Daycove" Executable="daycove.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="Daycove"
+        Description="Daycove - Task, notes and planning app"
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png" />
+    </Application>
+  </Applications>
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>
+"@
+          Set-Content -Path "msix/AppxManifest.xml" -Value $manifest -Encoding UTF8
+
+          $makeappx = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin" -Recurse -Filter makeappx.exe |
+            Where-Object { $_.FullName -match 'x64' } |
+            Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName
+          if (-not $makeappx) { throw "makeappx.exe not found (Windows SDK missing)" }
+
+          New-Item -ItemType Directory -Path release-artifacts -Force | Out-Null
+          $msix = "release-artifacts/Daycove_$env:DISPLAY_VERSION_x64.msix"
+          & $makeappx pack /d msix /p $msix /nv /o
+          if ($LASTEXITCODE -ne 0) { throw "makeappx failed" }
+
+          if (-not [string]::IsNullOrEmpty($env:MSIX_PFX_BASE64)) {
+            $pfx = Join-Path $env:RUNNER_TEMP "msix-signing.pfx"
+            [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:MSIX_PFX_BASE64))
+            $signtool = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin" -Recurse -Filter signtool.exe |
+              Where-Object { $_.FullName -match 'x64' } |
+              Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName
+            if (-not $signtool) { throw "signtool.exe not found" }
+            $argList = @('sign', '/fd', 'SHA256', '/f', $pfx)
+            if (-not [string]::IsNullOrEmpty($env:MSIX_PFX_PASSWORD)) {
+              $argList += @('/p', $env:MSIX_PFX_PASSWORD)
+            }
+            $argList += $msix
+            & $signtool @argList
+            if ($LASTEXITCODE -ne 0) { throw "signtool failed" }
+          } else {
+            Write-Host "MSIX_PFX_BASE64 not set - MSIX is unsigned (a self-signed cert is required for sideloading; the Store signs it on submission)."
+          }
+
+          Get-ChildItem release-artifacts | Select-Object Name, Length
+
+      - name: Upload MSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundles-windows-msix
+          path: release-artifacts/
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    needs: [version, build, msix]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.version.outputs.tag }}
+          name: '${{ env.APP_NAME }} ${{ needs.version.outputs.display }}'
+          body: |
+            ## ${{ env.APP_NAME }} ${{ needs.version.outputs.display }}
+
+            Version **${{ needs.version.outputs.semver }}**.
+
+            ## Installers
+
+            | Platform | File |
+            |---|---|
+            | macOS | `.dmg` |
+            | Linux | `.deb`, `.rpm` |
+            | Windows | `.msi`, `.exe` (NSIS), `.msix` (Microsoft Store) |
+          draft: false
+          prerelease: false
+          files: artifacts/**
