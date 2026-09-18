@@ -1,6 +1,16 @@
 <nav class="sidebar" [class.closed]="!open()" aria-label="Navigation principale">
   <a
     class="nav-item"
+    routerLink="/calendar"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }"
+  >
+    <lucide-angular name="calendar" [size]="18" [strokeWidth]="1.8" />
+    <span>Calendrier</span>
+  </a>
+
+  <a
+    class="nav-item"
     routerLink="/dashboard"
     routerLinkActive="active"
     [routerLinkActiveOptions]="{ exact: true }"
