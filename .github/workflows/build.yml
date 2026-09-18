@@ -92,19 +92,25 @@ jobs:
         shell: bash
         env:
           SEMVER: ${{ needs.version.outputs.semver }}
-        run: node -e "
-            const fs = require('fs');
-            const semver = process.env.SEMVER;
-            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-            pkg.version = semver;
-            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
-            const conf = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8'));
-            conf.version = semver;
-            fs.writeFileSync('src-tauri/tauri.conf.json', JSON.stringify(conf, null, 2) + '\n');
-            const cargo = fs.readFileSync('src-tauri/Cargo.toml', 'utf8');
-            fs.writeFileSync('src-tauri/Cargo.toml', cargo.replace(/^version = \".*\"/m, 'version = \"' + semver + '\"'));
-            console.log('Version set to', semver);
-          "
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const semver = process.env.SEMVER;
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          pkg.version = semver;
+          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          const conf = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8'));
+          conf.version = semver;
+          const parts = semver.split('.').map(Number);
+          const msi = (parts[0] - 2000) + '.' + parts[1] + '.' + parts[2];
+          conf.bundle = conf.bundle || {};
+          conf.bundle.windows = conf.bundle.windows || {};
+          conf.bundle.windows.wix = { version: msi };
+          fs.writeFileSync('src-tauri/tauri.conf.json', JSON.stringify(conf, null, 2) + '\n');
+          const cargo = fs.readFileSync('src-tauri/Cargo.toml', 'utf8');
+          fs.writeFileSync('src-tauri/Cargo.toml', cargo.replace(/^version = ".*"/m, 'version = "' + semver + '"'));
+          console.log('App version:', semver, '| MSI version:', msi);
+          NODE
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -170,18 +176,20 @@ jobs:
         shell: bash
         env:
           SEMVER: ${{ needs.version.outputs.semver }}
-        run: node -e "
-            const fs = require('fs');
-            const semver = process.env.SEMVER;
-            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-            pkg.version = semver;
-            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
-            const conf = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8'));
-            conf.version = semver;
-            fs.writeFileSync('src-tauri/tauri.conf.json', JSON.stringify(conf, null, 2) + '\n');
-            const cargo = fs.readFileSync('src-tauri/Cargo.toml', 'utf8');
-            fs.writeFileSync('src-tauri/Cargo.toml', cargo.replace(/^version = \".*\"/m, 'version = \"' + semver + '\"'));
-          "
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const semver = process.env.SEMVER;
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          pkg.version = semver;
+          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          const conf = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8'));
+          conf.version = semver;
+          fs.writeFileSync('src-tauri/tauri.conf.json', JSON.stringify(conf, null, 2) + '\n');
+          const cargo = fs.readFileSync('src-tauri/Cargo.toml', 'utf8');
+          fs.writeFileSync('src-tauri/Cargo.toml', cargo.replace(/^version = ".*"/m, 'version = "' + semver + '"'));
+          console.log('Version set to', semver);
+          NODE
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -240,7 +248,7 @@ jobs:
             <Dependencies>
               <TargetDeviceFamily Name="Windows.Desktop"
                                   MinVersion="10.0.17763.0"
-                                  MaxVersionTested="10.0.0.0" />
+                                  MaxVersionTested="10.0.22000.0" />
             </Dependencies>
             <Resources>
               <Resource Language="en-us" />
