@@ -50,15 +50,11 @@
   text-align: center;
 
   .logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: 52px;
     height: 52px;
     margin-bottom: 8px;
     border-radius: 14px;
-    background: var(--accent);
-    color: var(--accent-contrast);
+    object-fit: cover;
   }
 
   .version {
