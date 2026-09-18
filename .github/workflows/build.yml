@@ -57,14 +57,16 @@ jobs:
           - platform: macos-latest
             bundles: 'dmg'
           - platform: ubuntu-22.04
-            bundles: 'deb,rpm'
+            bundles: 'deb'
+          - platform: fedora-latest
+            bundles: 'rpm'
           - platform: windows-latest
             bundles: 'msi,nsis'
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Linux system dependencies
+      - name: Install Ubuntu system dependencies
         if: startsWith(matrix.platform, 'ubuntu')
         run: |
           sudo apt-get update
@@ -73,7 +75,17 @@ jobs:
             libappindicator3-dev \
             librsvg2-dev \
             patchelf \
-            rpm \
+            file
+
+      - name: Install Fedora system dependencies
+        if: startsWith(matrix.platform, 'fedora')
+        run: |
+          sudo dnf install -y \
+            webkit2gtk4.1-devel \
+            gtk3-devel \
+            openssl-devel \
+            librsvg2-devel \
+            patchelf \
             file
 
       - name: Set version
@@ -98,10 +110,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
 
       - name: Install npm dependencies
-        run: npm ci
+        run: npm install
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -151,10 +162,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
 
       - name: Install npm dependencies
-        run: npm ci
+        run: npm install
 
       - name: Set version
         shell: bash
@@ -313,7 +323,8 @@ jobs:
             | Platform | File |
             |---|---|
             | macOS | `.dmg` |
-            | Linux | `.deb`, `.rpm` |
+            | Ubuntu / Debian | `.deb` |
+            | Fedora / RHEL | `.rpm` |
             | Windows | `.msi`, `.exe` (NSIS), `.msix` (Microsoft Store) |
           draft: false
           prerelease: false
