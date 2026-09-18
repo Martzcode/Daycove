@@ -2,6 +2,7 @@ import { Component, inject, signal, type OnDestroy } from '@angular/core';
 import { getCurrentWindow, type Window } from '@tauri-apps/api/window';
 import { isTauri } from '@tauri-apps/api/core';
 import { LucideAngularModule } from 'lucide-angular';
+import { I18n } from '../../i18n';
 import { ThemeService } from '../../theme';
 
 @Component({
@@ -12,6 +13,8 @@ import { ThemeService } from '../../theme';
 })
 export class TitleBar implements OnDestroy {
   protected readonly isMaximized = signal(false);
+
+  protected readonly i18n = inject(I18n);
 
   private readonly themeService = inject(ThemeService);
   protected readonly theme = this.themeService.theme;

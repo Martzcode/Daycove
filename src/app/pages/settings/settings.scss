@@ -1,0 +1,65 @@
+.page {
+  h1 {
+    margin: 0 0 20px;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+  }
+}
+
+.settings-card {
+  max-width: 640px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.form-label {
+  flex-shrink: 0;
+  width: 180px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.form-control {
+  flex: 1;
+  display: flex;
+}
+
+.form-select {
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  option {
+    background: var(--surface);
+    color: var(--text);
+  }
+}

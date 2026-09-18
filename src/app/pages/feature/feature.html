@@ -1,6 +1,6 @@
 <section class="page">
   <h1>{{ title() }}</h1>
   <div class="placeholder-card">
-    <p>Le contenu de «&nbsp;{{ title() }}&nbsp;» arrive bientôt.</p>
+    <p>{{ i18n.translate('feature.placeholder', { title: title() }) }}</p>
   </div>
 </section>

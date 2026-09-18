@@ -12,7 +12,7 @@
     <div class="theme-toggle">
       <button
         class="win-btn"
-        [attr.title]="theme() === 'light' ? 'Activer le thème sombre' : 'Activer le thème clair'"
+        [attr.title]="theme() === 'light' ? i18n.translate('titlebar.enableDark') : i18n.translate('titlebar.enableLight')"
         (click)="toggleTheme()"
       >
         @if (theme() === 'light') {
@@ -23,11 +23,15 @@
       </button>
     </div>
 
-    <button class="win-btn" title="Réduire" (click)="onMinimize()">
+    <button class="win-btn" [attr.title]="i18n.translate('titlebar.minimize')" (click)="onMinimize()">
       <lucide-angular name="minus" [size]="10" [strokeWidth]="1" />
     </button>
 
-    <button class="win-btn" [attr.title]="isMaximized() ? 'Restaurer' : 'Agrandir'" (click)="onToggleMaximize()">
+    <button
+      class="win-btn"
+      [attr.title]="isMaximized() ? i18n.translate('titlebar.restore') : i18n.translate('titlebar.maximize')"
+      (click)="onToggleMaximize()"
+    >
       @if (isMaximized()) {
         <lucide-angular name="copy" [size]="10" [strokeWidth]="1" />
       } @else {
@@ -35,7 +39,7 @@
       }
     </button>
 
-    <button class="win-btn close" title="Fermer" (click)="onClose()">
+    <button class="win-btn close" [attr.title]="i18n.translate('titlebar.close')" (click)="onClose()">
       <lucide-angular name="x" [size]="10" [strokeWidth]="1" />
     </button>
   </div>

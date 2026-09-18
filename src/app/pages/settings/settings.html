@@ -1,0 +1,24 @@
+<section class="page">
+  <h1>{{ i18n.translate('nav.settings') }}</h1>
+
+  <div class="settings-card">
+    <div class="form-row">
+      <label class="form-label" for="language-select">
+        {{ i18n.translate('settings.language') }}
+      </label>
+      <div class="form-control">
+        <select
+          id="language-select"
+          class="form-select"
+          (change)="onLocaleChange($event)"
+        >
+          @for (language of languages; track language.code) {
+            <option [value]="language.code" [selected]="i18n.locale() === language.code">
+              {{ language.nativeName }} ({{ language.short }})
+            </option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+</section>

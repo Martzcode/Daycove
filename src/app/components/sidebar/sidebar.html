@@ -1,4 +1,4 @@
-<nav class="sidebar" aria-label="Navigation principale">
+<nav class="sidebar" [attr.aria-label]="i18n.translate('nav.aria')">
   <a
     class="nav-item"
     routerLink="/calendar"
@@ -6,7 +6,7 @@
     [routerLinkActiveOptions]="{ exact: true }"
   >
     <lucide-angular name="calendar" [size]="18" [strokeWidth]="1.8" />
-    <span>Calendrier</span>
+    <span>{{ i18n.translate('nav.calendar') }}</span>
   </a>
 
   <a
@@ -16,21 +16,21 @@
     [routerLinkActiveOptions]="{ exact: true }"
   >
     <lucide-angular name="layout-grid" [size]="18" [strokeWidth]="1.8" />
-    <span>Tableau de bord</span>
+    <span>{{ i18n.translate('nav.dashboard') }}</span>
   </a>
 
   <a class="nav-item" routerLink="/tasks" routerLinkActive="active">
     <lucide-angular name="list-checks" [size]="18" [strokeWidth]="1.8" />
-    <span>Tâches</span>
+    <span>{{ i18n.translate('nav.tasks') }}</span>
   </a>
 
   <a class="nav-item" routerLink="/settings" routerLinkActive="active">
     <lucide-angular name="settings" [size]="18" [strokeWidth]="1.8" />
-    <span>Paramètres</span>
+    <span>{{ i18n.translate('nav.settings') }}</span>
   </a>
 
   <a class="nav-item" routerLink="/about" routerLinkActive="active">
     <lucide-angular name="info" [size]="18" [strokeWidth]="1.8" />
-    <span>À propos</span>
+    <span>{{ i18n.translate('nav.about') }}</span>
   </a>
 </nav>

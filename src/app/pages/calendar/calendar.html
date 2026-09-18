@@ -2,11 +2,11 @@
   <div class="calendar-header">
     <h1>{{ monthYear() }}</h1>
     <div class="calendar-nav">
-      <button class="nav-btn" title="Semaine précédente" (click)="previousWeek()">
+      <button class="nav-btn" [attr.title]="i18n.translate('calendar.previousWeek')" (click)="previousWeek()">
         <lucide-angular name="chevron-left" [size]="16" [strokeWidth]="2" />
       </button>
-      <button class="nav-btn today-btn" (click)="goToToday()">Aujourd'hui</button>
-      <button class="nav-btn" title="Semaine suivante" (click)="nextWeek()">
+      <button class="nav-btn today-btn" (click)="goToToday()">{{ i18n.translate('calendar.today') }}</button>
+      <button class="nav-btn" [attr.title]="i18n.translate('calendar.nextWeek')" (click)="nextWeek()">
         <lucide-angular name="chevron-right" [size]="16" [strokeWidth]="2" />
       </button>
     </div>
