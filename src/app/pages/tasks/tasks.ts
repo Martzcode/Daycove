@@ -55,8 +55,10 @@ export class TasksPage {
 
   protected readonly cards = signal<TaskNode[]>(TasksPage.load());
 
+  protected readonly sortedCards = computed(() => TasksPage.sortContent(this.cards()));
+
   protected readonly cardViews = computed(() =>
-    this.cards().map((card) => {
+    this.sortedCards().map((card) => {
       const entries: FlatEntry[] = [];
       TasksPage.flatten(card.content, 1, entries);
       let doneCount = 0;
@@ -70,7 +72,7 @@ export class TasksPage {
   );
 
   constructor() {
-    effect(() => localStorage.setItem(STORAGE_KEY, JSON.stringify(this.cards())));
+    effect(() => localStorage.setItem(STORAGE_KEY, JSON.stringify(this.sortedCards())));
   }
 
   protected preventEditorBlur(event: MouseEvent): void {
@@ -241,6 +243,12 @@ export class TasksPage {
       const done = content.length > 0 ? content.every((child) => child.done) : node.done;
       return { ...node, content, done };
     });
+  }
+
+  private static sortContent(nodes: TaskNode[]): TaskNode[] {
+    const pending = nodes.filter((node) => !node.done).map((node) => ({ ...node, content: TasksPage.sortContent(node.content) }));
+    const done = nodes.filter((node) => node.done).map((node) => ({ ...node, content: TasksPage.sortContent(node.content) }));
+    return [...pending, ...done];
   }
 
   private static flatten(nodes: readonly TaskNode[], depth = 0, out: FlatEntry[] = []): FlatEntry[] {
