@@ -1,9 +1,11 @@
 import { Component, input, output, signal, type OnDestroy } from '@angular/core';
 import { getCurrentWindow, type Window } from '@tauri-apps/api/window';
 import { isTauri } from '@tauri-apps/api/core';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-title-bar',
+  imports: [LucideAngularModule],
   templateUrl: './title-bar.html',
   styleUrl: './title-bar.scss',
 })
