@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { AboutPage } from './pages/about/about';
 import { CalendarPage } from './pages/calendar/calendar';
 import { FeaturePage } from './pages/feature/feature';
 import { SettingsPage } from './pages/settings/settings';
@@ -10,5 +11,5 @@ export const routes: Routes = [
   { path: 'dashboard', component: FeaturePage, data: { titleKey: 'nav.dashboard' } },
   { path: 'tasks', component: TasksPage },
   { path: 'settings', component: SettingsPage },
-  { path: 'about', component: FeaturePage, data: { titleKey: 'nav.about' } },
+  { path: 'about', component: AboutPage },
 ];

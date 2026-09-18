@@ -1,0 +1,60 @@
+<section class="page">
+  <h1>{{ i18n.translate('nav.about') }}</h1>
+
+  <div class="about-layout">
+    <div class="about-card hero">
+      <div class="logo"><lucide-angular name="sparkles" [size]="28"></lucide-angular></div>
+      <h2>Daycove</h2>
+      <span class="version">{{ i18n.translate('about.version') }} {{ version }}</span>
+      <p class="tagline">{{ i18n.translate('about.tagline') }}</p>
+    </div>
+
+    <div class="about-card">
+      <h3>{{ i18n.translate('about.features') }}</h3>
+      <ul class="feature-list">
+        <li>
+          <lucide-angular name="calendar" [size]="18"></lucide-angular>
+          <span>{{ i18n.translate('about.features.calendar') }}</span>
+        </li>
+        <li>
+          <lucide-angular name="list-checks" [size]="18"></lucide-angular>
+          <span>{{ i18n.translate('about.features.tasks') }}</span>
+        </li>
+        <li>
+          <lucide-angular name="sticky-note" [size]="18"></lucide-angular>
+          <span>{{ i18n.translate('about.features.notes') }}</span>
+        </li>
+        <li>
+          <lucide-angular name="tag" [size]="18"></lucide-angular>
+          <span>{{ i18n.translate('about.features.dates') }}</span>
+        </li>
+        <li>
+          <lucide-angular name="moon" [size]="18"></lucide-angular>
+          <span>{{ i18n.translate('about.features.theme') }}</span>
+        </li>
+        <li>
+          <lucide-angular name="globe" [size]="18"></lucide-angular>
+          <span>{{ i18n.translate('about.features.language') }}</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="about-card">
+      <h3>{{ i18n.translate('about.tech') }}</h3>
+      <p class="tech">{{ i18n.translate('about.tech.value') }}</p>
+    </div>
+
+    <div class="about-card credits">
+      <h3>{{ i18n.translate('about.credits') }}</h3>
+      <p>{{ i18n.translate('about.developedBy') }}</p>
+      <a class="author-link" href="https://github.com/Martzcode" target="_blank" rel="noopener noreferrer">
+        <lucide-angular name="github" [size]="20"></lucide-angular>
+        <span>Martzcode</span>
+        <lucide-angular name="external-link" [size]="16"></lucide-angular>
+      </a>
+      <a class="source-link" href="https://github.com/Martzcode" target="_blank" rel="noopener noreferrer">
+        {{ i18n.translate('about.sourceCode') }} <lucide-angular name="external-link" [size]="14"></lucide-angular>
+      </a>
+    </div>
+  </div>
+</section>
