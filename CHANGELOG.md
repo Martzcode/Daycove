@@ -8,20 +8,6 @@ Le numéro de version suit le format **YYYY.MM.xx** (année.mois.compteur mensue
 
 ## 2026.09.02
 
-<!-- 🇬🇧 -->
-
-### Continuous Integration
-
-- **Automatic Build & Release** (GitHub Actions): every commit or merge to `main` triggers the build of the **dmg** (macOS), **deb + rpm** (Linux), **msi + exe (NSIS)** and **msix** (Microsoft Store) installers, then automatically publishes a GitHub release.
-- **Automatic versioning**: the version is computed from the number of releases in the current month; the next release therefore goes from `2026.09.01` to `2026.09.02`, and so on, reverting to `01` at each month change.
-
-<!-- 🇫🇷 -->
-
-### Intégration continue
-
-- **Build & Release automatique** (GitHub Actions) : chaque commit ou merge vers `main` déclenche la compilation des installateurs **dmg** (macOS), **deb + rpm** (Linux), **msi + exe (NSIS)** et **msix** (Microsoft Store), puis publie une release GitHub automatiquement.
-- **Version automatique** : la version est calculée à partir du nombre de releases du mois courant ; la release suivante passe donc de `2026.09.01` à `2026.09.02`, et ainsi de suite, en revenant à `01` à chaque changement de mois.
-
 ## 2026.09.01
 
 First public release. / Première version publique.

@@ -275,6 +275,8 @@ jobs:
           DISPLAY_VERSION: ${{ needs.version.outputs.display }}
           SEMVER: ${{ needs.version.outputs.semver }}
           MS_STORE_PUBLISHER: ${{ secrets.MS_STORE_PUBLISHER }}
+          MS_STORE_IDENTITY_NAME: ${{ secrets.MS_STORE_IDENTITY_NAME }}
+          MS_STORE_PUBLISHER_DISPLAY: ${{ secrets.MS_STORE_PUBLISHER_DISPLAY }}
           MSIX_PFX_BASE64: ${{ secrets.MSIX_PFX_BASE64 }}
           MSIX_PFX_PASSWORD: ${{ secrets.MSIX_PFX_PASSWORD }}
         run: |
@@ -287,7 +289,11 @@ jobs:
           $exe = Get-ChildItem -Recurse -Path "src-tauri/target/release" -Filter "daycove.exe" | Select-Object -First 1
           if (-not $exe) { throw "daycove.exe not found" }
           $publisher = $env:MS_STORE_PUBLISHER
-          if ([string]::IsNullOrEmpty($publisher)) { $publisher = "CN=Martzcode" }
+          if ([string]::IsNullOrEmpty($publisher)) { $publisher = "CN=7D2188A8-E979-4CC7-B4CA-0B3ADA615D01" }
+          $identity = $env:MS_STORE_IDENTITY_NAME
+          if ([string]::IsNullOrEmpty($identity)) { $identity = "Martzcode.Daycove" }
+          $publisherDisplay = $env:MS_STORE_PUBLISHER_DISPLAY
+          if ([string]::IsNullOrEmpty($publisherDisplay)) { $publisherDisplay = "Martzcode" }
           $version = "${env:SEMVER}.0"
 
           New-Item -ItemType Directory -Path "msix/Assets" -Force | Out-Null
@@ -303,13 +309,13 @@ jobs:
           <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
                    xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
                    xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities">
-            <Identity Name="com.daycove.app"
+            <Identity Name="$identity"
                       Publisher="$publisher"
                       Version="$version"
                       ProcessorArchitecture="x64" />
             <Properties>
               <DisplayName>Daycove</DisplayName>
-              <PublisherDisplayName>Martzcode</PublisherDisplayName>
+              <PublisherDisplayName>$publisherDisplay</PublisherDisplayName>
               <Logo>Assets\StoreLogo.png</Logo>
             </Properties>
             <Dependencies>
